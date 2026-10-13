@@ -15,7 +15,7 @@ permissions:
 
 env:
   PROJECT_NAME: "multicloud-devops-pipeline"
-  AWS_REGION: "us-east-1"
+  AWS_REGION: "ap-southeast-2"
   AWS_ECR_REPO: "multicloud-devops-pipeline-repo"
   AZURE_RESOURCE_GROUP_PREFIX: "rg-multicloud-devops-pipeline"
 
@@ -95,77 +95,51 @@ jobs:
 
       - name: Configure AWS credentials via IAM Identity
         uses: aws-actions/configure-aws-credentials@v4
-        continue-on-error: true
-        id: config-aws
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Authenticate Docker client to Amazon ECR
-        if: steps.config-aws.outcome == 'success'
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-        continue-on-error: true
-
-      - name: Ensure Amazon ECR Repository Exists
-        if: steps.login-ecr.outcome == 'success'
-        run: |
-          echo "Checking if ECR repository '${AWS_ECR_REPO}' exists..."
-          aws ecr describe-repositories --repository-names "${AWS_ECR_REPO}" --region "${AWS_REGION}" >/dev/null 2>&1 || \
-          aws ecr create-repository --repository-name "${AWS_ECR_REPO}" --region "${AWS_REGION}" --image-scanning-configuration scanOnPush=true || true
-          echo "ECR repository check complete."
 
       - name: Build, tag, and publish Docker container image to Amazon ECR
-        if: steps.login-ecr.outcome == 'success'
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG_SHA: ${{ github.sha }}
         run: |
-          if [ -n "${ECR_REGISTRY}" ]; then
-            IMAGE_URI_SHA="${ECR_REGISTRY}/${AWS_ECR_REPO}:${IMAGE_TAG_SHA}"
-            IMAGE_URI_LATEST="${ECR_REGISTRY}/${AWS_ECR_REPO}:latest"
+          IMAGE_URI_SHA="${ECR_REGISTRY}/${AWS_ECR_REPO}:${IMAGE_TAG_SHA}"
+          IMAGE_URI_LATEST="${ECR_REGISTRY}/${AWS_ECR_REPO}:latest"
 
-            echo "Building container from src/Dockerfile..."
-            docker build \
-              --file src/Dockerfile \
-              --tag "${IMAGE_URI_SHA}" \
-              --tag "${IMAGE_URI_LATEST}" \
-              src/
+          echo "Building container from src/Dockerfile..."
+          docker build \
+            --file src/Dockerfile \
+            --tag "${IMAGE_URI_SHA}" \
+            --tag "${IMAGE_URI_LATEST}" \
+            src/
 
-            echo "Pushing images to Amazon ECR..."
-            docker push "${IMAGE_URI_SHA}" || true
-            docker push "${IMAGE_URI_LATEST}" || true
-            echo "Successfully published container to Amazon ECR."
-          else
-            echo "Notice: ECR registry endpoint was not exported; skipping Docker push."
-          fi
+          echo "Pushing images to Amazon ECR in ${AWS_REGION}..."
+          docker push "${IMAGE_URI_SHA}"
+          docker push "${IMAGE_URI_LATEST}"
+          echo "Successfully published container to Amazon ECR repository: ${AWS_ECR_REPO}!"
 
       - name: Trigger AWS App Runner automatic deployment update
-        if: steps.login-ecr.outcome == 'success'
         run: |
-          echo "Querying App Runner service for ${PROJECT_NAME}-svc..."
+          echo "Checking App Runner service for ${PROJECT_NAME}-svc in ${AWS_REGION}..."
           SERVICE_ARN=$(aws apprunner list-services \
             --region "${AWS_REGION}" \
             --query "ServiceSummaryList[?ServiceName=='${PROJECT_NAME}-svc'].ServiceArn" \
             --output text 2>/dev/null || true)
 
           if [ -n "$SERVICE_ARN" ] && [ "$SERVICE_ARN" != "None" ]; then
-            echo "Found active App Runner service: ${SERVICE_ARN}"
+            echo "Triggering deployment for App Runner: ${SERVICE_ARN}"
             aws apprunner start-deployment \
               --region "${AWS_REGION}" \
               --service-arn "${SERVICE_ARN}" || true
-            echo "Deployment successfully initiated for AWS App Runner."
           else
-            echo "Notice: App Runner service not active yet. Artifacts securely pushed to ECR."
+            echo "Image successfully stored in Amazon ECR (${AWS_ECR_REPO}:latest)."
           fi
-
-      - name: Handle AWS Organizational SCP Restrictions
-        if: steps.login-ecr.outcome == 'failure'
-        run: |
-          echo "::warning ::Notice: Your AWS Account is governed by an AWS Organization Service Control Policy (SCP) that restricts ecr:GetAuthorizationToken."
-          echo "AWS authentication succeeded, but ECR authorization is restricted by your organization administrator."
-          echo "The multi-cloud pipeline completed all quality gates and verified Azure deployment."
 
   # ============================================================================
   # Job 3: Simultaneous Continuous Deployment to Microsoft Azure
@@ -185,80 +159,55 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Retrieve or Auto-Create Azure ACR in Microsoft Azure
-        id: acr-info
+      - name: Prepare and Ensure Azure Container Registry
+        id: acr-prep
         run: |
-          ACR_NAME="${{ secrets.AZURE_ACR_NAME }}"
-          RG_NAME="rg-multicloud-pipeline"
-          echo "Checking if Azure Container Registry '${ACR_NAME}' exists in Azure..."
-          LOGIN_SERVER=$(az acr show --name "${ACR_NAME}" --query "loginServer" --output tsv 2>/dev/null || echo "")
+          RAW_ACR="${{ secrets.AZURE_ACR_NAME }}"
+          # Clean name to strictly alphanumeric lowercase
+          CLEAN_ACR=$(echo "${RAW_ACR}" | tr -cd '[:alnum:]' | tr '[:upper:]' '[:lower:]')
+          if [ -z "${CLEAN_ACR}" ]; then
+            CLEAN_ACR="acrmulticloud$(echo '${{ github.repository_owner }}' | tr -cd '[:alnum:]' | tr '[:upper:]' '[:lower:]')"
+          fi
+          echo "acr_name=${CLEAN_ACR}" >> $GITHUB_OUTPUT
 
-          if [ -z "${LOGIN_SERVER}" ]; then
-            echo "Registry '${ACR_NAME}' not found. Automatically provisioning Resource Group and ACR in Azure (Central India)..."
-            az group create --name "${RG_NAME}" --location "centralindia"
-            az acr create --resource-group "${RG_NAME}" --name "${ACR_NAME}" --sku Basic --admin-enabled true
-            LOGIN_SERVER=$(az acr show --name "${ACR_NAME}" --query "loginServer" --output tsv)
-            echo "Azure Container Registry '${ACR_NAME}' successfully created!"
+          RG_NAME="rg-multicloud-pipeline"
+          echo "Checking Azure Container Registry '${CLEAN_ACR}'..."
+          if ! az acr show --name "${CLEAN_ACR}" >/dev/null 2>&1; then
+            echo "Creating Resource Group '${RG_NAME}' and Azure Container Registry '${CLEAN_ACR}'..."
+            az group create --name "${RG_NAME}" --location "eastus"
+            az acr create --resource-group "${RG_NAME}" --name "${CLEAN_ACR}" --sku Basic --admin-enabled true || true
           fi
 
-          ADMIN_USER=$(az acr credential show --name "${ACR_NAME}" --query "username" --output tsv)
-          ADMIN_PASS=$(az acr credential show --name "${ACR_NAME}" --query "passwords[0].value" --output tsv)
-
-          echo "has_acr=true" >> $GITHUB_OUTPUT
+          LOGIN_SERVER=$(az acr show --name "${CLEAN_ACR}" --query "loginServer" --output tsv 2>/dev/null || echo "")
           echo "login_server=${LOGIN_SERVER}" >> $GITHUB_OUTPUT
-          echo "admin_username=${ADMIN_USER}" >> $GITHUB_OUTPUT
-          echo "::add-mask::${ADMIN_PASS}"
-          echo "admin_password=${ADMIN_PASS}" >> $GITHUB_OUTPUT
+          echo "Azure ACR login server: ${LOGIN_SERVER}"
 
       - name: Authenticate Docker CLI to Azure Container Registry
-        if: steps.acr-info.outputs.has_acr == 'true'
-        uses: azure/docker-login@v2
-        with:
-          login-server: ${{ steps.acr-info.outputs.login_server }}
-          username: ${{ steps.acr-info.outputs.admin_username }}
-          password: ${{ steps.acr-info.outputs.admin_password }}
+        run: |
+          ACR_NAME="${{ steps.acr-prep.outputs.acr_name }}"
+          echo "Authenticating Docker to ACR: ${ACR_NAME}..."
+          az acr login --name "${ACR_NAME}"
 
       - name: Build, tag, and publish Docker image to Azure Container Registry
-        if: steps.acr-info.outputs.has_acr == 'true'
         env:
-          LOGIN_SERVER: ${{ steps.acr-info.outputs.login_server }}
+          LOGIN_SERVER: ${{ steps.acr-prep.outputs.login_server }}
           IMAGE_TAG_SHA: ${{ github.sha }}
         run: |
-          IMAGE_URI_SHA="${LOGIN_SERVER}/${PROJECT_NAME}:${IMAGE_TAG_SHA}"
-          IMAGE_URI_LATEST="${LOGIN_SERVER}/${PROJECT_NAME}:latest"
+          if [ -n "${LOGIN_SERVER}" ]; then
+            IMAGE_URI_SHA="${LOGIN_SERVER}/${PROJECT_NAME}:${IMAGE_TAG_SHA}"
+            IMAGE_URI_LATEST="${LOGIN_SERVER}/${PROJECT_NAME}:latest"
 
-          echo "Building image from src/Dockerfile..."
-          docker build \
-            --file src/Dockerfile \
-            --tag "${IMAGE_URI_SHA}" \
-            --tag "${IMAGE_URI_LATEST}" \
-            src/
+            echo "Building image from src/Dockerfile..."
+            docker build \
+              --file src/Dockerfile \
+              --tag "${IMAGE_URI_SHA}" \
+              --tag "${IMAGE_URI_LATEST}" \
+              src/
 
-          echo "Pushing images to Azure Container Registry..."
-          docker push "${IMAGE_URI_SHA}"
-          docker push "${IMAGE_URI_LATEST}"
-          echo "Successfully published container to Azure Container Registry."
-
-      - name: Redeploy container image to Azure Linux Web App
-        if: steps.acr-info.outputs.has_acr == 'true'
-        run: |
-          LOGIN_SERVER="${{ steps.acr-info.outputs.login_server }}"
-          IMAGE_LATEST="${LOGIN_SERVER}/${PROJECT_NAME}:latest"
-
-          APP_NAME=$(az webapp list \
-            --query "[?starts_with(name, 'app-${PROJECT_NAME}')].name | [0]" \
-            --output tsv 2>/dev/null || true)
-          RESOURCE_GROUP=$(az webapp list \
-            --query "[?starts_with(name, 'app-${PROJECT_NAME}')].resourceGroup | [0]" \
-            --output tsv 2>/dev/null || true)
-
-          if [ -n "$APP_NAME" ] && [ "$APP_NAME" != "None" ]; then
-            az webapp config container set \
-              --name "${APP_NAME}" \
-              --resource-group "${RESOURCE_GROUP}" \
-              --docker-custom-image-name "${IMAGE_LATEST}"
-            az webapp restart --name "${APP_NAME}" --resource-group "${RESOURCE_GROUP}"
-            echo "Azure Web App successfully updated."
+            echo "Pushing images to Azure Container Registry..."
+            docker push "${IMAGE_URI_SHA}"
+            docker push "${IMAGE_URI_LATEST}"
+            echo "Successfully published container to Azure Container Registry: ${LOGIN_SERVER}!"
           else
-            echo "Notice: Azure Web App not running yet. Image pushed to ACR: ${IMAGE_LATEST}"
+            echo "Notice: Azure ACR login server was unavailable; check Azure subscription quotas."
           fi
