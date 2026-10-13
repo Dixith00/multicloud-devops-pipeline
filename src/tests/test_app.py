@@ -21,8 +21,10 @@ def client():
         yield test_client
 
 
-def test_root_endpoint_default_env(client):
+def test_root_endpoint_default_env(client, monkeypatch):
     """Verify root endpoint status code and payload structure with defaults."""
+    monkeypatch.delenv("CLOUD_PROVIDER", raising=False)
+    monkeypatch.delenv("REGION", raising=False)
     response = client.get("/")
     assert response.status_code == 200
     data = response.get_json()
@@ -52,8 +54,11 @@ def test_health_endpoint(client):
     assert "platform" in data["system"]
 
 
-def test_version_endpoint(client):
+def test_version_endpoint(client, monkeypatch):
     """Verify version endpoint reports version and commit information."""
+    monkeypatch.delenv("APP_VERSION", raising=False)
+    monkeypatch.delenv("COMMIT_SHA", raising=False)
+    monkeypatch.delenv("BUILD_TIMESTAMP", raising=False)
     response = client.get("/version")
     assert response.status_code == 200
     data = response.get_json()

@@ -51,9 +51,6 @@ jobs:
           flake8 src --count --max-complexity=10 --max-line-length=120 --exit-zero --statistics
 
       - name: Execute automated unit and integration tests (pytest)
-        env:
-          CLOUD_PROVIDER: "ci-pipeline"
-          REGION: "github-runner"
         run: |
           PYTHONPATH=src pytest src/tests/ -v --junitxml=test-reports.xml
 
