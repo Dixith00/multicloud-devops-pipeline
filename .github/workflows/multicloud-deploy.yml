@@ -1,0 +1,234 @@
+name: Multi-Cloud Production CI/CD & DevSecOps Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  security-events: write
+
+env:
+  PROJECT_NAME: "multicloud-devops-pipeline"
+  AWS_REGION: "ap-south-1"
+  AWS_ECR_REPO: "multicloud-devops-pipeline-repo"
+  AZURE_RESOURCE_GROUP_PREFIX: "rg-multicloud-devops-pipeline"
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  # ============================================================================
+  # Job 1: CI & DevSecOps Quality Gate
+  # ============================================================================
+  ci-security:
+    name: "CI & Security Gate (Lint, Unit Tests, Trivy SAST/SCA)"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source code repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python runtime environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+          cache-dependency-path: "src/requirements.txt"
+
+      - name: Install pinned project dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r src/requirements.txt
+
+      - name: Execute static code analysis and linting (flake8)
+        run: |
+          # Stop the build if there are Python syntax errors or undefined names
+          flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Exit-zero treats all warnings as non-fatal to enforce max complexity
+          flake8 src --count --max-complexity=10 --max-line-length=120 --statistics
+
+      - name: Execute automated unit and integration tests (pytest)
+        env:
+          CLOUD_PROVIDER: "ci-pipeline"
+          REGION: "github-runner"
+        run: |
+          PYTHONPATH=src pytest src/tests/ -v --junitxml=test-reports.xml
+
+      - name: Build local container image for DevSecOps vulnerability scan
+        run: |
+          docker build \
+            --file src/Dockerfile \
+            --tag ${{ env.PROJECT_NAME }}:${{ github.sha }} \
+            src/
+
+      - name: Execute Trivy vulnerability security scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "${{ env.PROJECT_NAME }}:${{ github.sha }}"
+          format: "table"
+          exit-code: "0"
+          ignore-unfixed: true
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
+
+      - name: Scan Filesystem and Infrastructure for Secrets & Misconfigurations
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "table"
+          exit-code: "0"
+          severity: "CRITICAL,HIGH"
+
+  # ============================================================================
+  # Job 2: Simultaneous Continuous Deployment to Amazon Web Services (AWS)
+  # ============================================================================
+  deploy-aws:
+    name: "Deploy to AWS (ECR & App Runner)"
+    needs: [ci-security]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source code repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via IAM Identity
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Authenticate Docker client to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and publish Docker container image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG_SHA: ${{ github.sha }}
+        run: |
+          IMAGE_URI_SHA="${ECR_REGISTRY}/${AWS_ECR_REPO}:${IMAGE_TAG_SHA}"
+          IMAGE_URI_LATEST="${ECR_REGISTRY}/${AWS_ECR_REPO}:latest"
+
+          echo "Building image from src/Dockerfile..."
+          docker build \
+            --file src/Dockerfile \
+            --tag "${IMAGE_URI_SHA}" \
+            --tag "${IMAGE_URI_LATEST}" \
+            src/
+
+          echo "Pushing images to Amazon ECR..."
+          docker push "${IMAGE_URI_SHA}"
+          docker push "${IMAGE_URI_LATEST}"
+
+      - name: Trigger AWS App Runner automatic deployment update
+        run: |
+          echo "Querying App Runner service for ${PROJECT_NAME}-svc..."
+          SERVICE_ARN=$(aws apprunner list-services \
+            --region "${AWS_REGION}" \
+            --query "ServiceSummaryList[?ServiceName=='${PROJECT_NAME}-svc'].ServiceArn" \
+            --output text)
+
+          if [ -n "$SERVICE_ARN" ] && [ "$SERVICE_ARN" != "None" ]; then
+            echo "Found active App Runner service: ${SERVICE_ARN}"
+            echo "Starting continuous deployment..."
+            aws apprunner start-deployment \
+              --region "${AWS_REGION}" \
+              --service-arn "${SERVICE_ARN}"
+            echo "Deployment successfully initiated for AWS App Runner."
+          else
+            echo "Notice: App Runner service '${PROJECT_NAME}-svc' not detected yet."
+            echo "Image has been securely updated in ECR: ${AWS_ECR_REPO}:latest"
+          fi
+
+  # ============================================================================
+  # Job 3: Simultaneous Continuous Deployment to Microsoft Azure
+  # ============================================================================
+  deploy-azure:
+    name: "Deploy to Azure (ACR & Linux Web App)"
+    needs: [ci-security]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source code repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Microsoft Azure via Service Principal
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Retrieve Azure ACR Credentials and Login Server
+        id: acr-info
+        run: |
+          ACR_NAME="${{ secrets.AZURE_ACR_NAME }}"
+          echo "ACR Name configured: ${ACR_NAME}"
+          LOGIN_SERVER=$(az acr show --name "${ACR_NAME}" --query "loginServer" --output tsv)
+          ADMIN_USER=$(az acr credential show --name "${ACR_NAME}" --query "username" --output tsv)
+          ADMIN_PASS=$(az acr credential show --name "${ACR_NAME}" --query "passwords[0].value" --output tsv)
+
+          echo "login_server=${LOGIN_SERVER}" >> $GITHUB_OUTPUT
+          echo "admin_username=${ADMIN_USER}" >> $GITHUB_OUTPUT
+          echo "::add-mask::${ADMIN_PASS}"
+          echo "admin_password=${ADMIN_PASS}" >> $GITHUB_OUTPUT
+
+      - name: Authenticate Docker CLI to Azure Container Registry
+        uses: azure/docker-login@v2
+        with:
+          login-server: ${{ steps.acr-info.outputs.login_server }}
+          username: ${{ steps.acr-info.outputs.admin_username }}
+          password: ${{ steps.acr-info.outputs.admin_password }}
+
+      - name: Build, tag, and publish Docker image to Azure Container Registry
+        env:
+          LOGIN_SERVER: ${{ steps.acr-info.outputs.login_server }}
+          IMAGE_TAG_SHA: ${{ github.sha }}
+        run: |
+          IMAGE_URI_SHA="${LOGIN_SERVER}/${PROJECT_NAME}:${IMAGE_TAG_SHA}"
+          IMAGE_URI_LATEST="${LOGIN_SERVER}/${PROJECT_NAME}:latest"
+
+          echo "Building image from src/Dockerfile..."
+          docker build \
+            --file src/Dockerfile \
+            --tag "${IMAGE_URI_SHA}" \
+            --tag "${IMAGE_URI_LATEST}" \
+            src/
+
+          echo "Pushing images to Azure Container Registry..."
+          docker push "${IMAGE_URI_SHA}"
+          docker push "${IMAGE_URI_LATEST}"
+
+      - name: Redeploy container image to Azure Linux Web App
+        run: |
+          LOGIN_SERVER="${{ steps.acr-info.outputs.login_server }}"
+          IMAGE_LATEST="${LOGIN_SERVER}/${PROJECT_NAME}:latest"
+
+          echo "Detecting Azure App Service webapp..."
+          APP_NAME=$(az webapp list \
+            --query "[?starts_with(name, 'app-${PROJECT_NAME}')].name | [0]" \
+            --output tsv)
+          RESOURCE_GROUP=$(az webapp list \
+            --query "[?starts_with(name, 'app-${PROJECT_NAME}')].resourceGroup | [0]" \
+            --output tsv)
+
+          if [ -n "$APP_NAME" ] && [ "$APP_NAME" != "None" ]; then
+            echo "Deploying container ${IMAGE_LATEST} to Web App: ${APP_NAME} in RG: ${RESOURCE_GROUP}"
+            az webapp config container set \
+              --name "${APP_NAME}" \
+              --resource-group "${RESOURCE_GROUP}" \
+              --docker-custom-image-name "${IMAGE_LATEST}"
+
+            echo "Triggering restart to pull newest container revision..."
+            az webapp restart --name "${APP_NAME}" --resource-group "${RESOURCE_GROUP}"
+            echo "Azure Web App successfully updated and restarted."
+          else
+            echo "Notice: Azure Web App starting with 'app-${PROJECT_NAME}' not found."
+            echo "Image has been securely updated in ACR: ${IMAGE_LATEST}"
+          fi

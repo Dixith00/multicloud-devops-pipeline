@@ -1,0 +1,18 @@
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-v"
+pythonpath = ["src"]
+testpaths = ["src/tests"]
+
+[tool.flake8]
+max-line-length = 120
+max-complexity = 10
+extend-ignore = ["E203", "W503"]
+exclude = [
+    ".git",
+    "__pycache__",
+    ".pytest_cache",
+    ".terraform",
+    "venv",
+    ".venv"
+]
