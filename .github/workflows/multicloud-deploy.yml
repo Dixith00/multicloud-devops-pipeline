@@ -170,6 +170,21 @@ jobs:
           fi
           echo "acr_name=${CLEAN_ACR}" >> $GITHUB_OUTPUT
 
+          echo "Ensuring Microsoft.ContainerRegistry is registered in Azure subscription..."
+          REG_STATE=$(az provider show --namespace Microsoft.ContainerRegistry --query "registrationState" --output tsv 2>/dev/null || echo "NotRegistered")
+          if [ "$REG_STATE" != "Registered" ]; then
+            echo "Registering Microsoft.ContainerRegistry provider..."
+            az provider register --namespace Microsoft.ContainerRegistry
+            for i in {1..15}; do
+              REG_STATE=$(az provider show --namespace Microsoft.ContainerRegistry --query "registrationState" --output tsv 2>/dev/null || echo "Registering")
+              echo "Registration state: $REG_STATE (attempt $i/15)"
+              if [ "$REG_STATE" == "Registered" ]; then
+                break
+              fi
+              sleep 4
+            done
+          fi
+
           RG_NAME="rg-multicloud-pipeline"
           echo "Ensuring Resource Group '${RG_NAME}' exists in Central India..."
           if ! az group show --name "${RG_NAME}" >/dev/null 2>&1; then
