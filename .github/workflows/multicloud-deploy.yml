@@ -171,16 +171,20 @@ jobs:
           echo "acr_name=${CLEAN_ACR}" >> $GITHUB_OUTPUT
 
           RG_NAME="rg-multicloud-pipeline"
-          echo "Checking Azure Container Registry '${CLEAN_ACR}'..."
-          if ! az acr show --name "${CLEAN_ACR}" >/dev/null 2>&1; then
-            echo "Creating Resource Group '${RG_NAME}' and Azure Container Registry '${CLEAN_ACR}'..."
-            az group create --name "${RG_NAME}" --location "eastus"
-            az acr create --resource-group "${RG_NAME}" --name "${CLEAN_ACR}" --sku Basic --admin-enabled true || true
+          echo "Ensuring Resource Group '${RG_NAME}' exists in Central India..."
+          if ! az group show --name "${RG_NAME}" >/dev/null 2>&1; then
+            az group create --name "${RG_NAME}" --location "centralindia"
           fi
 
-          LOGIN_SERVER=$(az acr show --name "${CLEAN_ACR}" --query "loginServer" --output tsv 2>/dev/null || echo "")
+          echo "Checking Azure Container Registry '${CLEAN_ACR}'..."
+          if ! az acr show --name "${CLEAN_ACR}" >/dev/null 2>&1; then
+            echo "Creating Azure Container Registry '${CLEAN_ACR}' in '${RG_NAME}'..."
+            az acr create --resource-group "${RG_NAME}" --name "${CLEAN_ACR}" --sku Basic --admin-enabled true
+          fi
+
+          LOGIN_SERVER=$(az acr show --name "${CLEAN_ACR}" --query "loginServer" --output tsv)
           echo "login_server=${LOGIN_SERVER}" >> $GITHUB_OUTPUT
-          echo "Azure ACR login server: ${LOGIN_SERVER}"
+          echo "Azure ACR login server is ready: ${LOGIN_SERVER}"
 
       - name: Authenticate Docker CLI to Azure Container Registry
         run: |
