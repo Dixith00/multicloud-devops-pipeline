@@ -185,26 +185,30 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Retrieve Azure ACR Credentials and Login Server
+      - name: Retrieve or Auto-Create Azure ACR in Microsoft Azure
         id: acr-info
         run: |
           ACR_NAME="${{ secrets.AZURE_ACR_NAME }}"
-          echo "Fetching credentials for ACR: ${ACR_NAME}..."
+          RG_NAME="rg-multicloud-pipeline"
+          echo "Checking if Azure Container Registry '${ACR_NAME}' exists in Azure..."
           LOGIN_SERVER=$(az acr show --name "${ACR_NAME}" --query "loginServer" --output tsv 2>/dev/null || echo "")
 
           if [ -z "${LOGIN_SERVER}" ]; then
-            echo "Notice: ACR registry '${ACR_NAME}' does not exist yet. Run 'terraform apply' to provision it."
-            echo "has_acr=false" >> $GITHUB_OUTPUT
-          else
-            ADMIN_USER=$(az acr credential show --name "${ACR_NAME}" --query "username" --output tsv)
-            ADMIN_PASS=$(az acr credential show --name "${ACR_NAME}" --query "passwords[0].value" --output tsv)
-
-            echo "has_acr=true" >> $GITHUB_OUTPUT
-            echo "login_server=${LOGIN_SERVER}" >> $GITHUB_OUTPUT
-            echo "admin_username=${ADMIN_USER}" >> $GITHUB_OUTPUT
-            echo "::add-mask::${ADMIN_PASS}"
-            echo "admin_password=${ADMIN_PASS}" >> $GITHUB_OUTPUT
+            echo "Registry '${ACR_NAME}' not found. Automatically provisioning Resource Group and ACR in Azure (Central India)..."
+            az group create --name "${RG_NAME}" --location "centralindia"
+            az acr create --resource-group "${RG_NAME}" --name "${ACR_NAME}" --sku Basic --admin-enabled true
+            LOGIN_SERVER=$(az acr show --name "${ACR_NAME}" --query "loginServer" --output tsv)
+            echo "Azure Container Registry '${ACR_NAME}' successfully created!"
           fi
+
+          ADMIN_USER=$(az acr credential show --name "${ACR_NAME}" --query "username" --output tsv)
+          ADMIN_PASS=$(az acr credential show --name "${ACR_NAME}" --query "passwords[0].value" --output tsv)
+
+          echo "has_acr=true" >> $GITHUB_OUTPUT
+          echo "login_server=${LOGIN_SERVER}" >> $GITHUB_OUTPUT
+          echo "admin_username=${ADMIN_USER}" >> $GITHUB_OUTPUT
+          echo "::add-mask::${ADMIN_PASS}"
+          echo "admin_password=${ADMIN_PASS}" >> $GITHUB_OUTPUT
 
       - name: Authenticate Docker CLI to Azure Container Registry
         if: steps.acr-info.outputs.has_acr == 'true'
