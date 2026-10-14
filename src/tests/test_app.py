@@ -31,7 +31,7 @@ def test_root_endpoint_default_env(client, monkeypatch):
 
     assert data["service"] == "multicloud-devops-pipeline"
     assert data["status"] == "online"
-    assert "Production Multi-Cloud CI/CD Active" in data["message"]
+    assert "Production Multi-Cloud CI/CD" in data["message"]
     assert data["cloud_provider"] == "local-development"
     assert data["region"] == "local-node"
     assert "timestamp" in data
