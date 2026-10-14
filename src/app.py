@@ -40,7 +40,7 @@ def create_app() -> Flask:
         payload = {
             "service": "multicloud-devops-pipeline",
             "status": "online",
-            "message": "Production Multi-Cloud CI/CD Active",
+            "message": "Production Multi-Cloud CI/CD - Evaluated Live",
             "cloud_provider": cloud_provider,
             "region": region,
             "timestamp": datetime.now(timezone.utc).isoformat(),
