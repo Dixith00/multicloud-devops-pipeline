@@ -1,0 +1,223 @@
+<mxfile host="app.diagrams.net" modified="2026-10-14T07:00:00.000Z" agent="Mozilla/5.0" version="24.0.0" type="device">
+  <diagram id="multicloud-arch-v4" name="Multi-Cloud Enterprise Reference Architecture">
+    <mxGraphModel dx="1600" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- LEFT COLUMN: Developer & CI/CD Source Domain -->
+        <mxCell id="source_col" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#4A5568;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="330" height="960" as="geometry" />
+        </mxCell>
+        <mxCell id="source_title" value="Developer &amp; CI/CD Source Domain" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontColor=#2D3748;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="75" width="290" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Developer Workstation Box -->
+        <mxCell id="dev_box" value="" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=5 5;fillColor=#F8FAFC;strokeColor=#64748B;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="60" y="730" width="290" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="dev_title" value="Local Workspace" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontColor=#334155;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="740" width="270" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="badge_dev" value="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="70" y="775" width="24" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="dev_icon" value="Developer Workstation&#xa;VS Code IDE • Python 3.13&#xa;Docker Desktop • Git CLI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#94A3B8;strokeWidth=1.2;fontSize=10;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="85" y="785" width="245" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="git_commit_box" value="Git Commit &amp; Push to main&#xa;(Automated Webhook Trigger)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#CBD5E1;fontSize=9.5;fontColor=#475569;" vertex="1" parent="1">
+          <mxGeometry x="85" y="885" width="245" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- GitHub VCS & Actions Box -->
+        <mxCell id="vcs_box" value="" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=5 5;fillColor=#F8FAFC;strokeColor=#2E7D32;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="60" y="130" width="290" height="570" as="geometry" />
+        </mxCell>
+        <mxCell id="vcs_title" value="GitHub VCS &amp; DevSecOps Pipeline" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontColor=#1B5E20;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="140" width="270" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="badge_vcs" value="2" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="70" y="175" width="24" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="gh_repo_card" value="&lt;b&gt;GitHub Repository&lt;/b&gt;&lt;br&gt;multicloud-devops-pipeline&lt;br&gt;&lt;font color='#666666'&gt;Encrypted Actions Secrets&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#24292F;strokeWidth=1.5;fontSize=10;fontColor=#24292F;" vertex="1" parent="1">
+          <mxGeometry x="85" y="180" width="245" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Quality Gates -->
+        <mxCell id="gates_box" value="&lt;b&gt;DevSecOps Quality Gates&lt;/b&gt;&lt;br&gt;• Flake8 Linter (PEP 8, Max-C &amp;le; 10)&lt;br&gt;• Pytest Suite (6 Tests, 100% Pass)&lt;br&gt;• Aqua Trivy (Container CVE Scan)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#81C784;fontSize=9.5;fontColor=#1B5E20;" vertex="1" parent="1">
+          <mxGeometry x="85" y="270" width="245" height="150" as="geometry" />
+        </mxCell>
+
+        <!-- Build -->
+        <mxCell id="badge_build" value="3" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="70" y="440" width="24" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="docker_card" value="&lt;b&gt;Docker Build Engine&lt;/b&gt;&lt;br&gt;Multi-Stage Hardening&lt;br&gt;Non-Root UID 10001 (appuser)&lt;br&gt;Tags: Git SHA, latest" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5FE;strokeColor=#0288D1;strokeWidth=1.3;fontSize=9.5;fontColor=#01579B;" vertex="1" parent="1">
+          <mxGeometry x="85" y="445" width="245" height="85" as="geometry" />
+        </mxCell>
+
+        <!-- Dispatch -->
+        <mxCell id="dispatch_card" value="&lt;b&gt;Parallel Continuous Deployment&lt;/b&gt;&lt;br&gt;Simultaneous Dual-Cloud Push&lt;br&gt;AWS ECR &amp; Azure ACR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E7;strokeColor=#FF9900;strokeWidth=1.3;fontSize=9.5;fontColor=#B26A00;" vertex="1" parent="1">
+          <mxGeometry x="85" y="555" width="245" height="70" as="geometry" />
+        </mxCell>
+
+
+        <!-- RIGHT COLUMN: Multi-Cloud Production Infrastructure -->
+        <mxCell id="cloud_outer" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1E293B;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="410" y="60" width="1120" height="960" as="geometry" />
+        </mxCell>
+        <mxCell id="cloud_title" value="Multi-Cloud Target Infrastructure (Active-Active Production)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontColor=#0F2D5A;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="430" y="75" width="600" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- COMPARTMENT 1: AWS -->
+        <mxCell id="aws_comp" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E91E63;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="430" y="115" width="1070" height="430" as="geometry" />
+        </mxCell>
+        <mxCell id="aws_comp_title" value="AWS Cloud Account (ap-southeast-2 Sydney)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontColor=#C2185B;fontSize=12.5;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="460" y="125" width="450" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- Amazon VPC -->
+        <mxCell id="aws_vpc" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAF5FF;strokeColor=#9333EA;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="450" y="160" width="1030" height="360" as="geometry" />
+        </mxCell>
+        <mxCell id="aws_vpc_title" value="Amazon VPC / Isolated Network" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontColor=#7E22CE;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="470" y="170" width="280" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ECR -->
+        <mxCell id="badge_ecr" value="4" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="465" y="205" width="24" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="aws_ecr" value="&lt;b&gt;Amazon ECR (Registry)&lt;/b&gt;&lt;br&gt;&lt;font color='#333333'&gt;multicloud-pipeline-repo&lt;/font&gt;&lt;br&gt;&lt;font color='#666666'&gt;Private OCI Registry&lt;br&gt;Scan-on-Push • Lifecycle Prune&lt;br&gt;Tags: Git SHA, latest&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF9900;strokeWidth=1.5;fontSize=10;fontColor=#CC7A00;" vertex="1" parent="1">
+          <mxGeometry x="480" y="215" width="310" height="135" as="geometry" />
+        </mxCell>
+
+        <!-- IAM under ECR -->
+        <mxCell id="aws_iam" value="&lt;b&gt;AWS IAM Roles&lt;/b&gt;&lt;br&gt;AppRunnerECRAccessPolicy&lt;br&gt;Least-Privilege Execution Trust" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#C62828;strokeWidth=1.2;fontSize=9.5;fontColor=#C62828;" vertex="1" parent="1">
+          <mxGeometry x="480" y="380" width="310" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="badge_iam" value="6" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="465" y="370" width="24" height="24" as="geometry" />
+        </mxCell>
+
+        <!-- App Runner on Right -->
+        <mxCell id="badge_app" value="5" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1085" y="205" width="24" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="aws_app" value="&lt;b&gt;AWS App Runner / ECS Service&lt;/b&gt;&lt;br&gt;&lt;font color='#0277BD'&gt;Python REST Microservice&lt;/font&gt;&lt;br&gt;&lt;font color='#555555'&gt;Port 8080 • Gunicorn (2w/4t)&lt;br&gt;Non-Root UID 10001 (appuser)&lt;br&gt;&lt;b&gt;Routes: / , /health , /version&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5FE;strokeColor=#0288D1;strokeWidth=1.6;fontSize=10;fontColor=#01579B;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="215" width="350" height="145" as="geometry" />
+        </mxCell>
+
+        <!-- CloudWatch under App Runner -->
+        <mxCell id="aws_cw" value="&lt;b&gt;Amazon CloudWatch&lt;/b&gt;&lt;br&gt;Live Container Logs &amp; Metrics Stream&lt;br&gt;Continuous Health Check Telemetry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C2185B;strokeWidth=1.2;fontSize=9.5;fontColor=#C2185B;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="380" width="350" height="95" as="geometry" />
+        </mxCell>
+
+        <!-- ECR -> App Runner flow -->
+        <mxCell id="flow_ecr_app" value="Pull Image" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#FF9900;strokeWidth=1.8;fontColor=#CC7A00;fontSize=10;fontStyle=1;" edge="1" parent="1" source="aws_ecr" target="aws_app">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- App Runner -> CloudWatch flow (vertical down) -->
+        <mxCell id="flow_app_cw" value="Logs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C2185B;strokeWidth=1.4;fontColor=#C2185B;fontSize=9;dashed=1;" edge="1" parent="1" source="aws_app" target="aws_cw">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+
+        <!-- COMPARTMENT 2: Azure -->
+        <mxCell id="az_comp" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0078D4;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="430" y="565" width="1070" height="430" as="geometry" />
+        </mxCell>
+        <mxCell id="az_comp_title" value="Microsoft Azure Account (Central India)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontColor=#0078D4;fontSize=12.5;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="460" y="575" width="450" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- Resource Group -->
+        <mxCell id="az_rg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F9FF;strokeColor=#0284C7;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="450" y="610" width="1030" height="360" as="geometry" />
+        </mxCell>
+        <mxCell id="az_rg_title" value="Resource Group: rg-multicloud" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontColor=#0369A1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="470" y="620" width="280" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ACR -->
+        <mxCell id="badge_acr" value="7" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="465" y="655" width="24" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="az_acr" value="&lt;b&gt;Azure Container Registry (ACR)&lt;/b&gt;&lt;br&gt;&lt;font color='#333333'&gt;multicloud-devops-pipeline&lt;/font&gt;&lt;br&gt;&lt;font color='#666666'&gt;Private OCI Registry&lt;br&gt;Basic SKU • Admin Enabled&lt;br&gt;Tags: Git SHA, latest&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0078D4;strokeWidth=1.5;fontSize=10;fontColor=#005A9E;" vertex="1" parent="1">
+          <mxGeometry x="480" y="665" width="310" height="135" as="geometry" />
+        </mxCell>
+
+        <!-- SP under ACR -->
+        <mxCell id="az_sp" value="&lt;b&gt;Service Principal (RBAC)&lt;/b&gt;&lt;br&gt;Role: Contributor • Scoped RBAC&lt;br&gt;Federated Credentials Secret" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FB;strokeColor=#0078D4;strokeWidth=1.2;fontSize=9.5;fontColor=#0078D4;" vertex="1" parent="1">
+          <mxGeometry x="480" y="830" width="310" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="badge_sp" value="9" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="465" y="820" width="24" height="24" as="geometry" />
+        </mxCell>
+
+        <!-- App Service on Right -->
+        <mxCell id="badge_azapp" value="8" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1085" y="655" width="24" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="az_app" value="&lt;b&gt;Azure Linux App Service&lt;/b&gt;&lt;br&gt;&lt;font color='#00695C'&gt;Python REST Microservice&lt;/font&gt;&lt;br&gt;&lt;font color='#555555'&gt;Port 8080 • Gunicorn (2w/4t)&lt;br&gt;Non-Root UID 10001 (appuser)&lt;br&gt;&lt;b&gt;Routes: / , /health , /version&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;strokeWidth=1.6;fontSize=10;fontColor=#004D40;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="665" width="350" height="145" as="geometry" />
+        </mxCell>
+
+        <!-- Azure Monitor under App Service -->
+        <mxCell id="az_mon" value="&lt;b&gt;Azure Monitor&lt;/b&gt;&lt;br&gt;App Insights &amp; Log Analytics&lt;br&gt;Real-Time Telemetry Stream" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3949AB;strokeWidth=1.2;fontSize=9.5;fontColor=#3949AB;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="830" width="350" height="95" as="geometry" />
+        </mxCell>
+
+        <!-- ACR -> App Service flow -->
+        <mxCell id="flow_acr_app" value="Pull Image" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0078D4;strokeWidth=1.8;fontColor=#005A9E;fontSize=10;fontStyle=1;" edge="1" parent="1" source="az_acr" target="az_app">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- App Service -> Monitor flow (vertical down) -->
+        <mxCell id="flow_app_mon" value="Logs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3949AB;strokeWidth=1.4;fontColor=#3949AB;fontSize=9;dashed=1;" edge="1" parent="1" source="az_app" target="az_mon">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Push Connectors -->
+        <mxCell id="flow_ci_aws" value="Push Docker Image" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#FF9900;strokeWidth=2;fontColor=#B26A00;fontSize=10;fontStyle=1;" edge="1" parent="1" source="dispatch_card" target="aws_ecr">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="380" y="580" />
+              <mxPoint x="380" y="280" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="flow_ci_az" value="Push Docker Image" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0078D4;strokeWidth=2;fontColor=#005A9E;fontSize=10;fontStyle=1;" edge="1" parent="1" source="dispatch_card" target="az_acr">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="380" y="600" />
+              <mxPoint x="380" y="730" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- EXTERNAL USERS ACTOR (Far Right) -->
+        <mxCell id="users_actor" value="Users &amp; Clients&#xa;(HTTPS Live Traffic)" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1E293B;strokeWidth=1.8;fontStyle=1;fontSize=11;fontColor=#1E293B;verticalAlign=bottom;spacingBottom=5;" vertex="1" parent="1">
+          <mxGeometry x="1560" y="470" width="70" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="badge_users" value="10" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1580" y="440" width="26" height="26" as="geometry" />
+        </mxCell>
+
+        <mxCell id="flow_aws_user" value="Active-Active HTTPS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7D32;strokeWidth=1.8;fontColor=#1B5E20;fontSize=10;fontStyle=1;" edge="1" parent="1" source="aws_app" target="users_actor">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="flow_az_user" value="Active-Active HTTPS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7D32;strokeWidth=1.8;fontColor=#1B5E20;fontSize=10;fontStyle=1;" edge="1" parent="1" source="az_app" target="users_actor">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
