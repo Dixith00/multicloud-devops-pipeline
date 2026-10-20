@@ -1,9 +1,6 @@
-"""Pytest test suite for Multi-Cloud DevOps Pipeline REST API."""
-
 import os
 import sys
 
-# Ensure src directory is present in sys.path across all platforms and test runners
 SRC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
@@ -14,7 +11,6 @@ from app import create_app  # noqa: E402
 
 @pytest.fixture
 def client():
-    """Create test client fixture for Flask application."""
     application = create_app()
     application.config["TESTING"] = True
     with application.test_client() as test_client:
@@ -22,7 +18,6 @@ def client():
 
 
 def test_root_endpoint_default_env(client, monkeypatch):
-    """Verify root endpoint status code and payload structure with defaults."""
     monkeypatch.delenv("CLOUD_PROVIDER", raising=False)
     monkeypatch.delenv("REGION", raising=False)
     response = client.get("/")
@@ -41,7 +36,6 @@ def test_root_endpoint_default_env(client, monkeypatch):
 
 
 def test_health_endpoint(client):
-    """Verify health probe endpoint returns 200 and healthy status."""
     response = client.get("/health")
     assert response.status_code == 200
     data = response.get_json()
@@ -55,7 +49,6 @@ def test_health_endpoint(client):
 
 
 def test_version_endpoint(client, monkeypatch):
-    """Verify version endpoint reports version and commit information."""
     monkeypatch.delenv("APP_VERSION", raising=False)
     monkeypatch.delenv("COMMIT_SHA", raising=False)
     monkeypatch.delenv("BUILD_TIMESTAMP", raising=False)
@@ -70,7 +63,6 @@ def test_version_endpoint(client, monkeypatch):
 
 
 def test_aws_environment_injection(monkeypatch):
-    """Verify API accurately reads and propagates AWS runtime variables."""
     monkeypatch.setenv("CLOUD_PROVIDER", "AWS")
     monkeypatch.setenv("REGION", "ap-south-1")
     monkeypatch.setenv("APP_VERSION", "2.1.0")
@@ -101,7 +93,6 @@ def test_aws_environment_injection(monkeypatch):
 
 
 def test_azure_environment_injection(monkeypatch):
-    """Verify API accurately reads and propagates Azure runtime variables."""
     monkeypatch.setenv("CLOUD_PROVIDER", "Azure")
     monkeypatch.setenv("REGION", "Central India")
     monkeypatch.setenv("APP_VERSION", "3.0.0-rc1")
@@ -125,7 +116,6 @@ def test_azure_environment_injection(monkeypatch):
 
 
 def test_not_found_handler(client):
-    """Verify non-existent route returns formatted 404 JSON response."""
     response = client.get("/invalid-route-path")
     assert response.status_code == 404
     data = response.get_json()

@@ -1,7 +1,5 @@
-# ==============================================================================
 # Terraform & Provider Version Constraints
 # Enforces compatibility for AWS (~> 5.0), AzureRM (~> 3.0), and Random (~> 3.5)
-# ==============================================================================
 
 terraform {
   required_version = ">= 1.5.0"

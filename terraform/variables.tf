@@ -1,7 +1,5 @@
-# ==============================================================================
 # Terraform Input Variables Definition
 # Configurable multi-cloud infrastructure parameters with free-tier defaults
-# ==============================================================================
 
 variable "aws_region" {
   type        = string

@@ -1,11 +1,7 @@
-# ==============================================================================
 # Terraform Outputs Definition
 # Exposes connection strings, container registry URIs, and live public URLs
-# ==============================================================================
 
-# ------------------------------------------------------------------------------
 # AWS Infrastructure Outputs
-# ------------------------------------------------------------------------------
 output "aws_ecr_repository_url" {
   description = "The Amazon ECR repository URL used for pushing container images"
   value       = aws_ecr_repository.app_repo.repository_url
@@ -31,9 +27,7 @@ output "aws_ecs_cluster_name" {
   value       = aws_ecs_cluster.app_cluster.name
 }
 
-# ------------------------------------------------------------------------------
 # Azure Infrastructure Outputs
-# ------------------------------------------------------------------------------
 output "azure_resource_group_name" {
   description = "Name of the deployed Azure Resource Group"
   value       = azurerm_resource_group.rg.name

@@ -7,7 +7,7 @@
 [![Azure Free Tier](https://img.shields.io/badge/Azure-F1%20Free%20Tier-0078D4?logo=microsoft-azure)](https://azure.microsoft.com)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-An enterprise-grade, zero-cost, multi-cloud CI/CD and DevSecOps reference implementation deploying a hardened containerized REST API simultaneously to **Amazon Web Services (AWS)** and **Microsoft Azure**.
+An enterprise-grade, multi-cloud CI/CD and DevSecOps reference implementation deploying a hardened containerized REST API simultaneously to **Amazon Web Services (AWS)** and **Microsoft Azure**.
 
 ---
 
@@ -16,7 +16,7 @@ An enterprise-grade, zero-cost, multi-cloud CI/CD and DevSecOps reference implem
 - **Simultaneous Dual-Cloud Continuous Deployment**: Concurrently builds, tags, and deploys container images to **AWS (Amazon ECR + AWS App Runner)** and **Microsoft Azure (Azure Container Registry + Azure Linux App Service F1)** on merges to `main`.
 - **Shift-Left DevSecOps Pipeline**: Incorporates automated PEP 8 linting (`flake8`), regression testing (`pytest`), and static vulnerability scanning (`Trivy` container & filesystem scans) prior to cloud artifact promotion.
 - **Hardened Multi-Stage Container**: Distroless-like multi-stage `Dockerfile` executing under a dedicated non-root user (`appuser`, UID `10001`) with read-only application files (`chmod 550`).
-- **100% Zero-Cost Free-Tier Guarantee**:
+- **100% Free-Tier Allocation Model**:
   - **AWS**: Region `ap-south-1` (Mumbai) using private ECR repository with automatic 10-image lifecycle policy retention and App Runner free tier compute.
   - **Azure**: Region `Central India` (Pune) using Linux App Service on the permanent `F1` Free Tier SKU with Azure Container Registry (Basic SKU).
 
@@ -203,9 +203,9 @@ azure_app_service_url     = "https://app-multicloud-devops-pipeline-123abc.azure
 
 ---
 
-## 7. Zero-Cost Free-Tier Teardown Protocol
+## 7. Cloud Teardown Protocol
 
-To ensure 100% adherence to zero-cost economics and prevent any unexpected charges after testing or demonstration:
+To ensure 100% adherence to economics and prevent any unexpected charges after testing or demonstration:
 
 ```bash
 cd terraform

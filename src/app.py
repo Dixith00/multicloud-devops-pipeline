@@ -1,9 +1,3 @@
-"""Multi-Cloud DevOps Pipeline - Core REST API Service.
-
-Exposes endpoints for root service discovery, health monitoring, and version
-metadata across AWS and Azure deployments.
-"""
-
 import os
 import platform
 import time
@@ -16,31 +10,25 @@ START_TIME = time.time()
 
 
 def create_app() -> Flask:
-    """Application factory for Flask REST API.
-
-    Returns:
-        Flask: Configured Flask application instance.
-    """
     app = Flask(__name__)
 
     @app.before_request
     def log_request_info() -> None:
-        """Log incoming request path and method for observability."""
-        app.logger.debug("Handling request %s %s", request.method, request.path)
+        app.logger.debug(
+            "Handling request %s %s", request.method, request.path
+        )
 
     @app.route("/", methods=["GET"])
     def root() -> tuple[Dict[str, Any], int]:
-        """Root endpoint returning service identity and cloud metadata.
-
-        Returns:
-            tuple[Dict[str, Any], int]: Response payload and HTTP status code.
-        """
         cloud_provider = os.environ.get("CLOUD_PROVIDER", "local-development")
         region = os.environ.get("REGION", "local-node")
         payload = {
             "service": "multicloud-devops-pipeline",
             "status": "online",
-            "message": "Production Multi-Cloud CI/CD - Evaluated Live by Dr. Arunkumar",
+            "message": (
+                "Production Multi-Cloud CI/CD - "
+                "Evaluated Live by Dr. Arunkumar"
+            ),
             "cloud_provider": cloud_provider,
             "region": region,
             "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -54,11 +42,6 @@ def create_app() -> Flask:
 
     @app.route("/health", methods=["GET"])
     def health() -> tuple[Dict[str, Any], int]:
-        """Health check endpoint for container probes and load balancers.
-
-        Returns:
-            tuple[Dict[str, Any], int]: Health payload and HTTP status code.
-        """
         cloud_provider = os.environ.get("CLOUD_PROVIDER", "local-development")
         region = os.environ.get("REGION", "local-node")
         uptime = round(time.time() - START_TIME, 2)
@@ -77,11 +60,6 @@ def create_app() -> Flask:
 
     @app.route("/version", methods=["GET"])
     def version() -> tuple[Dict[str, Any], int]:
-        """Version endpoint reporting build and commit metadata.
-
-        Returns:
-            tuple[Dict[str, Any], int]: Version payload and HTTP status code.
-        """
         cloud_provider = os.environ.get("CLOUD_PROVIDER", "local-development")
         region = os.environ.get("REGION", "local-node")
         app_version = os.environ.get("APP_VERSION", "1.0.0")
@@ -100,7 +78,6 @@ def create_app() -> Flask:
 
     @app.errorhandler(404)
     def not_found(error: Any) -> tuple[Dict[str, Any], int]:
-        """Handle 404 errors with standardized JSON output."""
         return jsonify({
             "error": "Not Found",
             "message": "The requested resource was not found on this server.",
@@ -109,7 +86,6 @@ def create_app() -> Flask:
 
     @app.errorhandler(500)
     def internal_error(error: Any) -> tuple[Dict[str, Any], int]:
-        """Handle 500 errors with standardized JSON output."""
         return jsonify({
             "error": "Internal Server Error",
             "message": "An unexpected error occurred processing the request.",

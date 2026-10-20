@@ -1,11 +1,7 @@
-# ==============================================================================
 # Multi-Cloud Infrastructure as Code (AWS & Azure)
-# Provisions zero-cost resources for simultaneous multi-cloud continuous deployment
-# ==============================================================================
+# Provisions production resources for simultaneous multi-cloud continuous deployment
 
-# ------------------------------------------------------------------------------
 # Provider Configuration
-# ------------------------------------------------------------------------------
 provider "aws" {
   region = var.aws_region
 
@@ -42,9 +38,7 @@ locals {
   )
 }
 
-# ==============================================================================
 # AWS Infrastructure (Amazon ECR, App Runner & ECS Fargate Skeleton)
-# ==============================================================================
 
 # 1. Amazon Elastic Container Registry (ECR)
 resource "aws_ecr_repository" "app_repo" {
@@ -244,9 +238,7 @@ resource "aws_ecs_task_definition" "app_task" {
   ])
 }
 
-# ==============================================================================
 # Microsoft Azure Infrastructure (Resource Group, ACR & Linux Web App)
-# ==============================================================================
 
 # 1. Azure Resource Group
 resource "azurerm_resource_group" "rg" {
@@ -275,7 +267,7 @@ resource "azurerm_container_registry" "acr" {
   }
 }
 
-# 3. Azure Linux App Service Plan (Zero-Cost Free F1 Tier)
+# 3. Azure Linux App Service Plan (Free F1 Tier)
 resource "azurerm_service_plan" "asp" {
   name                = "asp-${var.project_name}-${var.environment}"
   resource_group_name = azurerm_resource_group.rg.name
