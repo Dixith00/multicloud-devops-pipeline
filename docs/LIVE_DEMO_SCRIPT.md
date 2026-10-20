@@ -8,7 +8,7 @@
 ## 🖥️ Screen Layout Setup (Prepare 2 Minutes Before)
 
 Arrange your screen cleanly for the evaluation:
-- **Left Half of Screen**: VS Code / Terminal open to `C:\Users\Dixith\Documents\antigravity\bold-darwin`
+- **Left Half of Screen**: VS Code / Terminal open to **Agile Project - Multi-Cloud DevOps Pipeline**
 - **Right Half of Screen**: Browser with 3 pre-loaded tabs:
   1. **Tab 1 — GitHub Actions Workflow**:
      `https://github.com/Dixith00/multicloud-devops-pipeline/actions`
@@ -151,7 +151,7 @@ Open in browser or curl in another terminal:
 
 ## 💼 Deliverables Ready for Submission
 
-- **Final Word Project Report**: [`docs/MultiCloud_DevOps_Project_Report_Dixith_Babu_24MIS0427.docx`](file:///c:/Users/Dixith/Documents/antigravity/bold-darwin/docs/MultiCloud_DevOps_Project_Report_Dixith_Babu_24MIS0427.docx)
-- **PowerPoint Slide Deck**: [`docs/MultiCloud_DevOps_Presentation_Dixith_Babu_24MIS0427.pptx`](file:///c:/Users/Dixith/Documents/antigravity/bold-darwin/docs/MultiCloud_DevOps_Presentation_Dixith_Babu_24MIS0427.pptx)
-- **Architecture Diagram (Draw.io Source)**: [`docs/architecture_diagram.drawio`](file:///c:/Users/Dixith/Documents/antigravity/bold-darwin/docs/architecture_diagram.drawio)
-- **Architecture Diagram (300 DPI PNG)**: [`docs/architecture_diagram.png`](file:///c:/Users/Dixith/Documents/antigravity/bold-darwin/docs/architecture_diagram.png)
+- **Final Word Project Report**: [`docs/MultiCloud_DevOps_Project_Report_Dixith_Babu_24MIS0427.docx`](MultiCloud_DevOps_Project_Report_Dixith_Babu_24MIS0427.docx)
+- **PowerPoint Slide Deck**: [`docs/MultiCloud_DevOps_Presentation_Dixith_Babu_24MIS0427.pptx`](MultiCloud_DevOps_Presentation_Dixith_Babu_24MIS0427.pptx)
+- **Architecture Diagram (Draw.io Source)**: [`docs/architecture_diagram.drawio`](architecture_diagram.drawio)
+- **Architecture Diagram (300 DPI PNG)**: [`docs/architecture_diagram.png`](architecture_diagram.png)
