@@ -27,7 +27,7 @@ def create_app() -> Flask:
             "status": "online",
             "message": (
                 "Production Multi-Cloud CI/CD - "
-                "Evaluated Live by Dr. Arunkumar 28/10/26"
+                "Evaluated live 31/10/26"
             ),
             "cloud_provider": cloud_provider,
             "region": region,
